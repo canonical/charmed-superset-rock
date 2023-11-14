@@ -1,0 +1,29 @@
+# Copyright 2023 Canonical Ltd.
+# See LICENSE file for licensing details.
+---
+name: charmed-superset-rock
+base: ubuntu@22.04
+version: '2.1.0' # Semantic versioning for human readability
+summary: Charmed Superset ROCK OCI
+description: |
+  Superset is fast, lightweight, intuitive, and loaded with options
+  that make it easy for users of all skill sets to explore and 
+  visualize their data.
+license: Apache-2.0
+
+platforms:
+  amd64:
+
+parts:
+  superset:
+    plugin: nil
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  
+    build-packages:
+      - build-essential
+      - python3.10
+      - python3.10-venv
+    stage-packages:
+      - python3-pip
+      - bash
+      - vim
+      - curl
