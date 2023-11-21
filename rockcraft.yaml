@@ -1,6 +1,7 @@
 # Copyright 2023 Canonical Ltd.
 # See LICENSE file for licensing details.
 ---
+# https://github.com/apache/superset/blob/2.1.0/RELEASING/Dockerfile.from_local_tarball
 name: charmed-superset-rock
 base: ubuntu@22.04
 version: '2.1.0' # Semantic versioning for human readability
@@ -14,35 +15,20 @@ license: Apache-2.0
 platforms:
   amd64:
 
-# services:
-#   superset-ui:
-#     override: replace
-#     summary: "superset ui service"
-#     startup: enabled
-#     command: /usr/bin/run-server.sh
-#     environment:
-#       PYTHONPATH: "/app/pythonpath"
-
 parts:
   backend:
     plugin: python
     source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
-    # https://superset.apache.org/docs/installation/installing-superset-from-scratch/
     build-packages:
       - build-essential
       - wget
-      # - libsasl2-dev
-      # - libldap2-dev
-      # - libssl-dev
-      # - libffi-dev
-      # - default-libmysqlclient-dev
     stage-packages:
       - python3.10-venv
     build-environment:
       - APP_HOME: "app"
       - SOURCE: "https://downloads.apache.org/superset/"
       - VERSION: "2.1.0"
-      - DIST_PACKAGES: "/usr/local/lib/python3.10/dist-packages/"
+      - DIST_PACKAGES: "usr/local/lib/python3.10/dist-packages/"
     override-build: |
       craftctl default
       # make home directory
@@ -56,14 +42,41 @@ parts:
       wget "${SOURCE}/${VERSION}/apache-superset-${VERSION}-source.tar.gz" -O superset.tar.gz
       tar -zxvf superset.tar.gz -C ${APP_HOME} --strip-components 1
       rm -rf superset.tar.gz
-      cp -r ${APP_HOME} "${CRAFT_PART_INSTALL}/${APP_HOME}"
 
+  frontend:
+    after: [backend]
+    plugin: nil
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
+    build-snaps:
+      - node/14/stable
+    override-build: |
+      mkdir -p /superset/static/assets/
+      cd superset-frontend
+      npm install currencyformatter.js --save
+      npm ci
+      npm run build
+      rm -rf node_modules
+
+  gunicorn-app:
+    after: [backend, frontend]
+    plugin: python
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
+    build-packages:
+      - build-essential
+    stage-packages:
+      - python3.10-venv
+    build-environment:
+      - APP_HOME: "app"
+      - DIST_PACKAGES: "usr/local/lib/python3.10/dist-packages/"
+      - PYTHONPATH: /app/superset
+    override-build: |
       # Install dependencies
       pip install --upgrade setuptools pip
       pip install "cython<3.0.0" 
       pip install --no-build-isolation pyyaml==5.4.1
-      cd ${APP_HOME} && pip install --no-cache -r requirements/base.txt
-      pip install Werkzeug==2.2.2
-      pip install sqlparse==0.4.3
+      pip install -r requirements/base.txt --target=/${DIST_PACKAGES}
 
-      cp -r /usr/local/lib/python3.10/dist-packages/* $CRAFT_PRIME
+      # Copy packages to PRIME
+      mkdir -p ${CRAFT_PRIME}/${DIST_PACKAGES}
+      cp -r /${DIST_PACKAGES}* $CRAFT_PRIME/${DIST_PACKAGES}
+      cp -r . "${CRAFT_PART_INSTALL}/${APP_HOME}"
