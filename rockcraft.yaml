@@ -1,7 +1,7 @@
 # Copyright 2023 Canonical Ltd.
 # See LICENSE file for licensing details.
 ---
-# https://github.com/apache/superset/blob/2.1.0/RELEASING/Dockerfile.from_local_tarball
+# https://github.com/apache/superset/blob/master/Dockerfile
 name: charmed-superset-rock
 base: ubuntu@22.04
 version: '2.1.0' # Semantic versioning for human readability
@@ -49,13 +49,17 @@ parts:
     source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
     build-snaps:
       - node/14/stable
+    build-environment:
+      - APP_HOME: "app"
+      - ASSETS_DIR: "lib/python3.10/site-packages/superset/static/assets/"
     override-build: |
       mkdir -p /superset/static/assets/
       cd superset-frontend
       npm install currencyformatter.js --save
       npm ci
-      npm run build
-      rm -rf node_modules
+      npm run build -- --output-path=/dist
+      mkdir -p "${CRAFT_PART_INSTALL}/${ASSETS_DIR}"
+      cp -r /dist/* "${CRAFT_PART_INSTALL}/${ASSETS_DIR}"
 
   gunicorn-app:
     after: [backend, frontend]
@@ -75,6 +79,15 @@ parts:
       pip install "cython<3.0.0" 
       pip install --no-build-isolation pyyaml==5.4.1
       pip install -r requirements/base.txt --target=/${DIST_PACKAGES}
+
+      # install optional connectors
+      pip install psycopg2-binary
+      pip install SQLAlchemy
+      pip install Authlib
+      pip install elasticsearch-dbapi
+
+      pip install -e .
+      flask fab babel-compile --target superset/translations
 
       # Copy packages to PRIME
       mkdir -p ${CRAFT_PRIME}/${DIST_PACKAGES}
