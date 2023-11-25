@@ -12,6 +12,18 @@ description: |
   visualize their data.
 license: Apache-2.0
 
+services:
+  superset-ui:
+    override: replace
+    summary: "superset-ui service"
+    startup: disabled
+    command: "/app/k8s/k8s-bootstrap.sh"
+    environment:
+      CHARM_FUNCTION: "app-gunicorn"
+      SUPERSET_SECRET_KEY: "supersetR0cks!"
+      ADMIN_PASSWORD: "admin"
+      SUPERSET_LOAD_EXAMPLES: True
+
 platforms:
   amd64:
 
@@ -34,7 +46,7 @@ parts:
       # make home directory
       mkdir -p ${APP_HOME}
 
-      # install pip
+      # Install pip
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
       apt-get install python3-pip
 
@@ -48,6 +60,7 @@ parts:
     source: ./startup-scripts
     organize:
       run-server.sh : app/k8s/run-server.sh
+      k8s-init.sh: app/k8s/k8s-init.sh
       k8s-bootstrap.sh: app/k8s/k8s-bootstrap.sh
 
   frontend:
@@ -104,7 +117,7 @@ parts:
       pip install elasticsearch-dbapi==0.2.10
       pip install trino==0.327.0
       pip install pyhive==0.7.0
-      pip install SQLALchemy==1.4.36
+      pip install SQLALchemy==2.0.23
       pip install thrift==0.16.0
       pip install sqlalchemy-redshift==0.8.1
 

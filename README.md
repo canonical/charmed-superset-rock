@@ -36,7 +36,7 @@ sudo lxd init --auto
 ```bash
 rockcraft pack
 sudo skopeo --insecure-policy copy oci-archive:charmed-superset-rock_2.1.0_amd64.rock docker-daemon:/charmed-superset-rock:2.1.0
-docker run --rm -it charmed-superset-rock:2.1.0
+docker run -d --name superset-ui-services -p 8088:8088 charmed-superset-rock:2.1.0 --args superset-ui -g 'daemon off:' \; start superset-ui
 ```
 ## License
 The Charmed Superset ROCK is free software, distributed under the Apache
