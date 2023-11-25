@@ -8,7 +8,7 @@ version: '2.1.0' # Semantic versioning for human readability
 summary: Charmed Superset ROCK OCI
 description: |
   Superset is fast, lightweight, intuitive, and loaded with options
-  that make it easy for users of all skill sets to explore and 
+  that make it easy for users of all skill sets to explore and
   visualize their data.
 license: Apache-2.0
 
@@ -30,7 +30,8 @@ platforms:
 parts:
   backend:
     plugin: python
-    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
+    source: |
+      https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
     build-packages:
       - build-essential
       - wget
@@ -47,7 +48,8 @@ parts:
       mkdir -p ${APP_HOME}
 
       # Download and unpack tar
-      wget "${SOURCE}/${VERSION}/apache-superset-${VERSION}-source.tar.gz" -O superset.tar.gz
+      wget "${SOURCE}/${VERSION}/apache-superset-${VERSION}-source.tar.gz" \
+        `-O superset.tar.gz
       tar -zxvf superset.tar.gz -C ${APP_HOME} --strip-components 1
       rm -rf superset.tar.gz
 
@@ -55,14 +57,15 @@ parts:
     plugin: dump
     source: ./startup-scripts
     organize:
-      run-server.sh : app/k8s/run-server.sh
+      run-server.sh: app/k8s/run-server.sh
       k8s-init.sh: app/k8s/k8s-init.sh
       k8s-bootstrap.sh: app/k8s/k8s-bootstrap.sh
 
   frontend:
     after: [backend]
     plugin: nil
-    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
+    source: |
+      https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
     build-snaps:
       - node/14/stable
     build-environment:
@@ -85,7 +88,8 @@ parts:
   gunicorn-app:
     after: [backend, frontend, local-files]
     plugin: python
-    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
+    source: |
+      https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
     build-packages:
       - build-essential
     stage-packages:
@@ -96,7 +100,7 @@ parts:
     override-build: |
       # Install superset requirements
       pip install --upgrade setuptools pip
-      pip install "cython<3.0.0" 
+      pip install "cython<3.0.0"
       pip install --no-build-isolation pyyaml==5.4.1
       pip install -r requirements/base.txt --target=/${DIST_PACKAGES}
 
