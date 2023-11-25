@@ -37,18 +37,14 @@ parts:
     stage-packages:
       - python3.10-venv
     build-environment:
-      - APP_HOME: "app"
-      - SOURCE: "https://downloads.apache.org/superset/"
+      - APP_HOME: "/app"
+      - SOURCE: "https://downloads.apache.org/superset"
       - VERSION: "2.1.0"
       - DIST_PACKAGES: "usr/local/lib/python3.10/dist-packages/"
     override-build: |
       craftctl default
       # make home directory
       mkdir -p ${APP_HOME}
-
-      # Install pip
-      apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
-      apt-get install python3-pip
 
       # Download and unpack tar
       wget "${SOURCE}/${VERSION}/apache-superset-${VERSION}-source.tar.gz" -O superset.tar.gz
@@ -70,23 +66,21 @@ parts:
     build-snaps:
       - node/14/stable
     build-environment:
-      - APP_HOME: "app"
-      - ASSETS_DIR: "lib/python3.10/site-packages/superset/static/assets/"
+      - ASSETS_DIR: "/lib/python3.10/site-packages/superset/static/assets"
     override-build: |
       # Prepare for asset creation
-      mkdir -p /superset/static/assets/
       cd superset-frontend
 
-      # Install missing dependency
+      # Install missing frontend dependency
       npm install currencyformatter.js --save
 
-      # Install dependencies and build assets
+      # Install frontend dependencies and build assets
       npm ci
       npm run build -- --output-path=/dist
 
-      # Copy assets to CRAFT_PART_INSTALL
-      mkdir -p "${CRAFT_PART_INSTALL}/${ASSETS_DIR}"
-      cp -r /dist/* "${CRAFT_PART_INSTALL}/${ASSETS_DIR}"
+      # Copy assets to CRAFT_PRIME
+      mkdir -p "${CRAFT_PRIME}${ASSETS_DIR}"
+      cp -r /dist/* "${CRAFT_PRIME}${ASSETS_DIR}"
 
   gunicorn-app:
     after: [backend, frontend, local-files]
@@ -97,10 +91,10 @@ parts:
     stage-packages:
       - python3.10-venv
     build-environment:
-      - APP_HOME: "app"
-      - DIST_PACKAGES: "usr/local/lib/python3.10/dist-packages/"
+      - APP_HOME: "/app"
+      - DIST_PACKAGES: "/usr/local/lib/python3.10/dist-packages"
     override-build: |
-      # Install dependencies
+      # Install superset requirements
       pip install --upgrade setuptools pip
       pip install "cython<3.0.0" 
       pip install --no-build-isolation pyyaml==5.4.1
@@ -125,9 +119,9 @@ parts:
       pip install -e .
 
       # Copy packages to PRIME
-      mkdir -p ${CRAFT_PRIME}/${DIST_PACKAGES}
-      cp -r /${DIST_PACKAGES}* $CRAFT_PRIME/${DIST_PACKAGES}
-      cp -r . "${CRAFT_PART_INSTALL}/${APP_HOME}"
+      mkdir -p ${CRAFT_PRIME}${DIST_PACKAGES}
+      cp -r ${DIST_PACKAGES}/* ${CRAFT_PRIME}${DIST_PACKAGES}
+      cp -r . ${CRAFT_PRIME}${APP_HOME}
 
   overlay-pkgs:
     plugin: nil
