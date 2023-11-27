@@ -7,9 +7,9 @@ base: ubuntu@22.04
 version: 2.1.0-22.04-edge
 summary: Charmed Superset ROCK OCI
 description: |
-  Superset is fast, lightweight, intuitive, and loaded with options
-  that make it easy for users of all skill sets to explore and
-  visualize their data.
+  Superset is a business intelligence tool that is fast, lightweight,
+  intuitive, and loaded with options that make it easy for users
+  to explore and visualize their data.
 license: Apache-2.0
 
 services:
