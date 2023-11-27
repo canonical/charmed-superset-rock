@@ -40,9 +40,9 @@ jobs:
           version=$(yq '(.version|split("-"))[0]' rockcraft.yaml)
           base=$(yq '(.base|split("@"))[1]' rockcraft.yaml)
           risk=edge
-          tag=${version}-${base}_${risk}
+          tag=${version}-${base}-${risk}
 
-          sed -i "s/${app_version}/${tag}/g" rockcraft.yaml
+          sed -i "0,/${app_version}/{s//${tag}/}" rockcraft.yaml
           rockcraft pack --verbose
 
       - name: Upload locally built ROCK artifact

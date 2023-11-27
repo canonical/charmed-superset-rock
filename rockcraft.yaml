@@ -4,7 +4,7 @@
 # https://github.com/apache/superset/blob/master/Dockerfile
 name: charmed-superset-rock
 base: ubuntu@22.04
-version: '2.1.0' # Semantic versioning for human readability
+version: 2.1.0
 summary: Charmed Superset ROCK OCI
 description: |
   Superset is fast, lightweight, intuitive, and loaded with options
