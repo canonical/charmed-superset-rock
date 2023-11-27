@@ -4,7 +4,7 @@
 # https://github.com/apache/superset/blob/master/Dockerfile
 name: charmed-superset-rock
 base: ubuntu@22.04
-version: 2.1.0
+version: 2.1.0-22.04-edge
 summary: Charmed Superset ROCK OCI
 description: |
   Superset is fast, lightweight, intuitive, and loaded with options
@@ -48,7 +48,7 @@ parts:
 
       # Download and unpack tar
       wget "${SOURCE}/${VERSION}/apache-superset-${VERSION}-source.tar.gz" \
-        `-O superset.tar.gz
+        -O superset.tar.gz
       tar -zxvf superset.tar.gz -C ${APP_HOME} --strip-components 1
       rm -rf superset.tar.gz
 
