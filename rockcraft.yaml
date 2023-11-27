@@ -30,8 +30,7 @@ platforms:
 parts:
   backend:
     plugin: python
-    source: |
-      https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
     build-packages:
       - build-essential
       - wget
@@ -64,8 +63,7 @@ parts:
   frontend:
     after: [backend]
     plugin: nil
-    source: |
-      https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
     build-snaps:
       - node/14/stable
     build-environment:
@@ -88,8 +86,7 @@ parts:
   gunicorn-app:
     after: [backend, frontend, local-files]
     plugin: python
-    source: |
-      https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
     build-packages:
       - build-essential
     stage-packages:
