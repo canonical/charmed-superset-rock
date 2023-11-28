@@ -10,34 +10,36 @@ If you are using another version of Ubuntu or another operating system, the proc
 To avoid any issue with other operating systems you can simply build the image with [multipass](https://multipass.run/):
 ```bash
 sudo snap install multipass
-multipass launch 22.04 -n rock-dev
+multipass launch -n rock-dev -m 8g -c 2 -d 20G
 multipass shell rock-dev
-``` 
-
+```
 ### Clone Repository
 ```bash
 git clone https://github.com/canonical/charmed-superset-rock.git
 cd charmed-superset-rock
 ```
-### Installing Prerequisites
+### Installing & Configuring Prerequisites
 ```bash
 sudo snap install rockcraft --edge --classic
-sudo snap install docker
-sudo snap install lxd
 sudo snap install skopeo --edge --devmode
-```
-### Configuring Prerequisites
-```bash
-sudo usermod -aG docker $USER 
 sudo lxd init --auto
+
+# Note: Docker must be installed after LXD is initialized due to firewall rules incompatibility.
+sudo snap install docker
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
 ```
-*_NOTE:_* You will need to open a new shell for the group change to take effect (i.e. `su - $USER`)
 ### Packing and Running the ROCK
 ```bash
 rockcraft pack
-sudo skopeo --insecure-policy copy oci-archive:charmed-superset-rock_2.1.0_amd64.rock docker-daemon:/charmed-superset-rock:2.1.0
+sudo skopeo --insecure-policy copy oci-archive:charmed-superset-rock_2.1.0_amd64.rock docker-daemon:charmed-superset-rock:2.1.0
 docker run -d --name superset-ui-services -p 8088:8088 charmed-superset-rock:2.1.0 --args superset-ui -g 'daemon off:' \; start superset-ui
 ```
+### Login
+After following the above instructions, navigate to `localhost:8088` and login with `admin`/`admin`. 
+Further information on connecting data sources and creating dashboards can be found at [superset.apache.org](https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard/).
+
 ## License
 The Charmed Superset ROCK is free software, distributed under the Apache
 Software License, version 2.0. See
