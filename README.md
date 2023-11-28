@@ -33,11 +33,18 @@ newgrp docker
 ### Packing and Running the ROCK
 ```bash
 rockcraft pack
-sudo skopeo --insecure-policy copy oci-archive:charmed-superset-rock_2.1.0_amd64.rock docker-daemon:charmed-superset-rock:2.1.0
+sudo skopeo --insecure-policy copy oci-archive:charmed-superset-rock_2.1.0-22.04-edge_amd64.rock docker-daemon:charmed-superset-rock:2.1.0
 docker run -d --name superset-ui-services -p 8088:8088 charmed-superset-rock:2.1.0 --args superset-ui -g 'daemon off:' \; start superset-ui
 ```
 ### Login
-After following the above instructions, navigate to `localhost:8088` and login with `admin`/`admin`. 
+To access Superset, now exit the multipass instance run `multipass list` for the below output.
+```
+Name                    State             IPv4             Image
+rock-dev                Running           10.137.215.60    Ubuntu 22.04 LTS
+                                          10.194.234.1
+                                          172.17.0.1
+```
+Navigate to `<VM IP Address>:8088` (in this case 10.137.215.60:8088) and login with `admin`/`admin`. 
 Further information on connecting data sources and creating dashboards can be found at [superset.apache.org](https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard/).
 
 ## License
