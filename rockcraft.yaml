@@ -40,15 +40,25 @@ parts:
       - APP_HOME: "/app"
       - SOURCE: "https://downloads.apache.org/superset"
       - VERSION: "2.1.0"
+      - TAR_FILE: "apache-superset-2.1.0-source.tar.gz"
       - DIST_PACKAGES: "usr/local/lib/python3.10/dist-packages/"
     override-build: |
       craftctl default
       # make home directory
       mkdir -p ${APP_HOME}
 
-      # Download and unpack tar
-      wget "${SOURCE}/${VERSION}/apache-superset-${VERSION}-source.tar.gz" \
-        -O superset.tar.gz
+      # Download the Superset tar
+      wget "${SOURCE}/${VERSION}/${TAR_FILE}" -O superset.tar.gz
+
+      # Download the Superset sha512
+      wget "${SOURCE}/${VERSION}/${TAR_FILE}.sha512" -O superset.tar.sha512
+
+      # Validate successful file download
+      sha_file=$(tail -n +2 superset.tar.sha512)
+      hash=$(echo $sha_file | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+      echo "$hash  superset.tar.gz" | sha512sum --check
+
+      # Unpack tar
       tar -zxvf superset.tar.gz -C ${APP_HOME} --strip-components 1
       rm -rf superset.tar.gz
 
