@@ -29,6 +29,11 @@ sudo snap install docker
 sudo groupadd docker
 sudo usermod -aG docker $USER
 newgrp docker
+
+# Note: disabling and enabling docker snap is required to avoid sudo requirement. 
+# As described in https://github.com/docker-snap/docker-snap.
+sudo snap disable docker
+sudo snap enable docker
 ```
 ### Packing and Running the ROCK
 ```bash
