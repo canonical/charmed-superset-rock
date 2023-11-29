@@ -49,7 +49,4 @@ jobs:
             oci-archive:charmed-superset-rock_${tag}_amd64.rock \
             docker-daemon:ghcr.io/canonical/charmed-superset-rock:${tag}
 
-          docker tag \
-            ghcr.io/canonical/charmed-superset-rock:${tag}
-
           docker push ghcr.io/canonical/charmed-superset-rock:${tag}
