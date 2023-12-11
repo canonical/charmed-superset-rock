@@ -52,6 +52,13 @@ rock-dev                Running           10.137.215.60    Ubuntu 22.04 LTS
 Navigate to `<VM IP Address>:8088` (in this case 10.137.215.60:8088) and login with `admin`/`admin`. 
 Further information on connecting data sources and creating dashboards can be found at [superset.apache.org](https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard/).
 
+## Using Makefile
+
+`make dev` will create the multipass image, clone the repo, install and configure the prerequisites.
+`make build` will pack the rock for you
+`make install` will build the oci image and run it
+`make clean` will remove the image and get you ready to start from `make dev`
+
 ## License
 The Charmed Superset ROCK is free software, distributed under the Apache
 Software License, version 2.0. See
