@@ -57,7 +57,8 @@ Further information on connecting data sources and creating dashboards can be fo
 `make dev` will create the multipass image, clone the repo, install and configure the prerequisites.
 `make build` will pack the rock for you
 `make install` will build the oci image and run it
-`make clean` will remove the image and get you ready to start from `make dev`
+`make clean` will remove build artifacts and enable you to rebuild
+`make clean-all` will remove the image and get you ready to start from `make dev`
 
 ## License
 The Charmed Superset ROCK is free software, distributed under the Apache
