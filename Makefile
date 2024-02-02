@@ -31,10 +31,14 @@ install-multipass:
 	sudo snap install multipass
 
 setup-multipass:
-	multipass launch $(UBUNTU_VER) -n $(ROCK_DEV) -m 8g -c 2 -d 20G
+	@if multipass --format=table list | awk '{print $1}' | grep $(ROCK_DEV); then \
+		echo '$(ROCK_DEV) exists'; \
+	else \
+		multipass launch $(UBUNTU_VER) -n $(ROCK_DEV) -m 8g -c 2 -d 20G; \
+	fi
 
 clone:
-	multipass exec $(ROCK_DEV) -- git clone $(REPO)
+	multipass exec $(ROCK_DEV) -- bash -c '[ -d "$(REPO_FOLDER)/.git" ] || git clone $(REPO)'
 
 install-prerequisites:
 	multipass exec $(ROCK_DEV) -- bash -c 'sudo snap install rockcraft --edge --classic &&\
