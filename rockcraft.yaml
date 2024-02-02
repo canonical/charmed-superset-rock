@@ -127,6 +127,9 @@ parts:
       pip install thrift==0.16.0
       pip install sqlalchemy-redshift==0.8.1
 
+      # Monitoring
+      pip install sentry-sdk==1.40.0
+
       # Install Superset in editable mode
       pip install -e .
 
