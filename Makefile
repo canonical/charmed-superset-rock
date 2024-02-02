@@ -8,6 +8,11 @@ DOCKER_NAME = superset-ui-services
 DOCKER_PORT = 8088
 DOCKER_ARGS = superset-ui -g 'daemon off:' \; start superset-ui
 
+REQUIRED_VARS := ROCK_DEV UBUNTU_VER REPO_FOLDER DOCKER_NAME DOCKER_PORT DOCKER_ARGS ROCK_VERSION
+
+$(foreach var,$(REQUIRED_VARS),\
+    $(if $(value $(var)),,$(error $(var) is not set)))
+
 # Targets
 .PHONY: all
 all: install-multipass setup-multipass clone install-prerequisites configure-prerequisites pack run
