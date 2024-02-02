@@ -50,7 +50,10 @@ configure-prerequisites:
 	multipass exec $(ROCK_DEV) -- bash -c 'if getent group docker > /dev/null; then echo "The docker group exists"; else sudo groupadd docker && echo "The docker group has been created"; fi; sudo usermod -aG docker $$USER'
 	multipass exec $(ROCK_DEV) -- bash -c 'sudo snap disable docker && sudo snap enable docker'
 
-.PHONY: pack
+clean:
+	multipass exec $(ROCK_DEV) -- bash -c 'docker ps -q -f "name=$(DOCKER_NAME)" && docker stop $(DOCKER_NAME) && docker rm $(DOCKER_NAME) && docker rmi charmed-superset-rock:$(ROCK_VERSION)'
+	multipass exec $(ROCK_DEV) -- bash -c 'rm $(REPO_FOLDER)/charmed-superset-rock_$(ROCK_VERSION)-$(UBUNTU_VER)-edge_amd64.rock'
+
 pack:
 	multipass exec $(ROCK_DEV) -- bash -c 'cd $(REPO_FOLDER) && rockcraft pack'
 
