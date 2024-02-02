@@ -61,4 +61,10 @@ run:
 	multipass exec $(ROCK_DEV) -- bash -c 'cd $(REPO_FOLDER) &&\
 		sudo skopeo --insecure-policy copy oci-archive:charmed-superset-rock_$(ROCK_VERSION)-$(UBUNTU_VER)-edge_amd64.rock docker-daemon:charmed-superset-rock:$(ROCK_VERSION)'
 	multipass exec $(ROCK_DEV) -- bash -c "cd $(REPO_FOLDER) &&\
-	docker run -d --name $(DOCKER_NAME) -p $(DOCKER_PORT):$(DOCKER_PORT) charmed-superset-rock:$(ROCK_VERSION) --args $(DOCKER_ARGS)"
+                docker run -d --name $(DOCKER_NAME) -p $(DOCKER_PORT):$(DOCKER_PORT) charmed-superset-rock:$(ROCK_VERSION) --args $(DOCKER_ARGS)"
+	@IP_ADDRESS=$$(multipass --format=table list | grep $(ROCK_DEV) | awk '{print $$3}') && \
+	echo "Waiting for Superset..."; \
+	while ! nc -z $$IP_ADDRESS $(DOCKER_PORT); do \
+		sleep 1; \
+	done && \
+	echo "Superset is up on $$IP_ADDRESS:$(DOCKER_PORT)"
