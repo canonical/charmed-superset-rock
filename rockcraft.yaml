@@ -126,6 +126,7 @@ parts:
       pip install pyhive==0.7.0
       pip install thrift==0.16.0
       pip install sqlalchemy-redshift==0.8.1
+      pip install urllib3==1.26.11
 
       # Monitoring
       pip install sentry-sdk==1.40.0
