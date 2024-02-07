@@ -129,7 +129,7 @@ parts:
       pip install urllib3==1.26.11
 
       # Monitoring
-      pip install sentry-sdk==1.40.0
+      pip install sentry-sdk==0.10.2
 
       # Install Superset in editable mode
       pip install -e .
