@@ -144,3 +144,4 @@ parts:
     overlay-packages:
       - ca-certificates
       - vim
+      - libecpg-dev
