@@ -1,0 +1,146 @@
+# Copyright 2023 Canonical Ltd.
+# See LICENSE file for licensing details.
+---
+# https://github.com/apache/superset/blob/master/Dockerfile
+name: charmed-superset-rock
+base: ubuntu@22.04
+version: 2.1.0-22.04-edge
+summary: Charmed Superset ROCK OCI
+description: |
+  Superset is a business intelligence tool that is fast, lightweight,
+  intuitive, and loaded with options that make it easy for users
+  to explore and visualize their data.
+license: Apache-2.0
+
+services:
+  superset-ui:
+    override: replace
+    summary: "superset-ui service"
+    startup: disabled
+    command: "/app/k8s/k8s-bootstrap.sh"
+    environment:
+      CHARM_FUNCTION: "app-gunicorn"
+      SUPERSET_SECRET_KEY: "supersetR0cks!"
+      ADMIN_PASSWORD: "admin"
+      SUPERSET_LOAD_EXAMPLES: True
+
+platforms:
+  amd64:
+
+parts:
+  backend:
+    plugin: python
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
+    build-packages:
+      - build-essential
+      - wget
+    stage-packages:
+      - python3.10-venv
+    build-environment:
+      - APP_HOME: "/app"
+      - SOURCE: "https://downloads.apache.org/superset"
+      - VERSION: "2.1.0"
+      - TAR_FILE: "apache-superset-2.1.0-source.tar.gz"
+      - DIST_PACKAGES: "usr/local/lib/python3.10/dist-packages/"
+    override-build: |
+      craftctl default
+      # make home directory
+      mkdir -p ${APP_HOME}
+
+      # Download the Superset tar
+      wget "${SOURCE}/${VERSION}/${TAR_FILE}" -O superset.tar.gz
+
+      # Download the Superset sha512
+      wget "${SOURCE}/${VERSION}/${TAR_FILE}.sha512" -O superset.tar.sha512
+
+      # Validate successful file download
+      sha_file=$(tail -n +2 superset.tar.sha512)
+      hash=$(echo $sha_file | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+      echo "$hash  superset.tar.gz" | sha512sum --check
+
+      # Unpack tar
+      tar -zxvf superset.tar.gz -C ${APP_HOME} --strip-components 1
+      rm -rf superset.tar.gz
+
+  local-files:
+    plugin: dump
+    source: ./startup-scripts
+    organize:
+      run-server.sh: app/k8s/run-server.sh
+      k8s-init.sh: app/k8s/k8s-init.sh
+      k8s-bootstrap.sh: app/k8s/k8s-bootstrap.sh
+
+  frontend:
+    after: [backend]
+    plugin: nil
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
+    build-snaps:
+      - node/14/stable
+    build-environment:
+      - ASSETS_DIR: "/lib/python3.10/site-packages/superset/static/assets"
+    override-build: |
+      # Prepare for asset creation
+      cd superset-frontend
+
+      # Install missing frontend dependency
+      npm install currencyformatter.js --save
+
+      # Install frontend dependencies and build assets
+      npm ci
+      npm run build -- --output-path=/dist
+
+      # Copy assets to CRAFT_PRIME
+      mkdir -p "${CRAFT_PRIME}${ASSETS_DIR}"
+      cp -r /dist/* "${CRAFT_PRIME}${ASSETS_DIR}"
+
+  gunicorn-app:
+    after: [backend, frontend, local-files]
+    plugin: python
+    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
+    build-packages:
+      - build-essential
+    stage-packages:
+      - python3.10-venv
+    build-environment:
+      - APP_HOME: "/app"
+      - DIST_PACKAGES: "/usr/local/lib/python3.10/dist-packages"
+    override-build: |
+      # Install superset requirements
+      pip install --upgrade setuptools pip
+      pip install "cython<3.0.0"
+      pip install --no-build-isolation pyyaml==5.4.1
+      pip install -r requirements/base.txt --target=/${DIST_PACKAGES}
+
+      # Required dependencies missing from Superset requirements.txt
+      pip install Pillow==10.1.0
+      pip install requests==2.31.0
+      pip install jmespath==1.0.1
+
+      # Optional dependencies for Database connectors
+      pip install psycopg2-binary==2.9.4
+      pip install sqlalchemy==1.4.51
+      pip install Werkzeug==2.3.7
+      pip install Authlib==1.2.1
+      pip install elasticsearch-dbapi==0.2.10
+      pip install trino==0.327.0
+      pip install pyhive==0.7.0
+      pip install thrift==0.16.0
+      pip install sqlalchemy-redshift==0.8.1
+      pip install urllib3==1.26.11
+
+      # Monitoring
+      pip install sentry-sdk==0.10.2
+
+      # Install Superset in editable mode
+      pip install -e .
+
+      # Copy packages to PRIME
+      mkdir -p ${CRAFT_PRIME}${DIST_PACKAGES}
+      cp -r ${DIST_PACKAGES}/* ${CRAFT_PRIME}${DIST_PACKAGES}
+      cp -r . ${CRAFT_PRIME}${APP_HOME}
+
+  overlay-pkgs:
+    plugin: nil
+    overlay-packages:
+      - ca-certificates
+      - vim
