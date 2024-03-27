@@ -99,6 +99,8 @@ parts:
     source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
     build-packages:
       - build-essential
+      - pkg-config
+      - libmysqlclient-dev
     stage-packages:
       - python3.10-venv
     build-environment:
@@ -123,6 +125,7 @@ parts:
       pip install Authlib==1.2.1
       pip install elasticsearch-dbapi==0.2.10
       pip install trino==0.327.0
+      pip install mysqlclient==2.1.1
       pip install pyhive==0.7.0
       pip install thrift==0.16.0
       pip install sqlalchemy-redshift==0.8.1
@@ -144,4 +147,6 @@ parts:
     overlay-packages:
       - ca-certificates
       - vim
+    stage-packages:
       - libecpg-dev
+      - libmysqlclient-dev
