@@ -133,6 +133,7 @@ parts:
 
       # Monitoring
       pip install sentry-sdk==0.10.2
+      pip install statsd==4.0.1
 
       # Install Superset in editable mode
       pip install -e .
