@@ -31,9 +31,10 @@ parts:
   backend:
     plugin: python
     source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
+    source-checksum: sha512/62d240555ea50156fd16ad6dbc6fb26b86ca5319d0528e60cd4fbcb9fbeb9d529acfb43e272883d578df87e609a541a0116dfa8f4a955a3aeca3538adf58852a
+    source-type: tar
     build-packages:
       - build-essential
-      - wget
     stage-packages:
       - python3.10-venv
     build-environment:
@@ -42,25 +43,15 @@ parts:
       - VERSION: "2.1.0"
       - TAR_FILE: "apache-superset-2.1.0-source.tar.gz"
       - DIST_PACKAGES: "usr/local/lib/python3.10/dist-packages/"
-    override-build: |
-      craftctl default
-      # make home directory
-      mkdir -p ${APP_HOME}
-
-      # Download the Superset tar
-      wget "${SOURCE}/${VERSION}/${TAR_FILE}" -O superset.tar.gz
-
-      # Download the Superset sha512
-      wget "${SOURCE}/${VERSION}/${TAR_FILE}.sha512" -O superset.tar.sha512
-
-      # Validate successful file download
-      sha_file=$(tail -n +2 superset.tar.sha512)
-      hash=$(echo $sha_file | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
-      echo "$hash  superset.tar.gz" | sha512sum --check
-
-      # Unpack tar
-      tar -zxvf superset.tar.gz -C ${APP_HOME} --strip-components 1
-      rm -rf superset.tar.gz
+    stage:
+      - apache_superset.egg-info
+      - build
+      - requirements
+      - scripts
+      - setup.cfg
+      - setup.py
+      - superset
+      - superset-frontend
 
   local-files:
     plugin: dump
@@ -69,18 +60,23 @@ parts:
       run-server.sh: app/k8s/run-server.sh
       k8s-init.sh: app/k8s/k8s-init.sh
       k8s-bootstrap.sh: app/k8s/k8s-bootstrap.sh
+      rock-requirements.txt: requirements/rock-requirements.txt
+    stage:
+      - app/k8s/run-server.sh
+      - app/k8s/k8s-init.sh
+      - app/k8s/k8s-bootstrap.sh
+      - requirements/rock-requirements.txt
 
   frontend:
     after: [backend]
     plugin: nil
-    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
     build-snaps:
       - node/14/stable
     build-environment:
       - ASSETS_DIR: "/lib/python3.10/site-packages/superset/static/assets"
     override-build: |
       # Prepare for asset creation
-      cd superset-frontend
+      cd ${CRAFT_STAGE}/superset-frontend
 
       # Install missing frontend dependency
       npm install currencyformatter.js --save
@@ -96,7 +92,6 @@ parts:
   gunicorn-app:
     after: [backend, frontend, local-files]
     plugin: python
-    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
     build-packages:
       - build-essential
       - pkg-config
@@ -108,39 +103,22 @@ parts:
       - DIST_PACKAGES: "/usr/local/lib/python3.10/dist-packages"
     override-build: |
       # Install superset requirements
-      pip install --upgrade setuptools pip
-      pip install "cython<3.0.0"
-      pip install --no-build-isolation pyyaml==5.4.1
-      pip install -r requirements/base.txt --target=/${DIST_PACKAGES}
-
-      # Required dependencies missing from Superset requirements.txt
-      pip install Pillow==10.1.0
-      pip install requests==2.31.0
-      pip install jmespath==1.0.1
-
-      # Optional dependencies for Database connectors
-      pip install psycopg2-binary==2.9.4
-      pip install sqlalchemy==1.4.51
-      pip install Werkzeug==2.3.7
-      pip install Authlib==1.2.1
-      pip install elasticsearch-dbapi==0.2.10
-      pip install trino==0.327.0
-      pip install mysqlclient==2.1.1
-      pip install pyhive==0.7.0
-      pip install thrift==0.16.0
-      pip install sqlalchemy-redshift==0.8.1
-      pip install urllib3==1.26.11
-
-      # Monitoring
-      pip install sentry-sdk==0.10.2
+      pip install --upgrade setuptools pip \
+        "cython<3.0.0" \
+        --no-build-isolation pyyaml==5.4.1 \
+        -r ${CRAFT_STAGE}/requirements/base.txt --target=/${DIST_PACKAGES} \
+        -r ${CRAFT_STAGE}/requirements/rock-requirements.txt --target=/${DIST_PACKAGES}
 
       # Install Superset in editable mode
       pip install -e .
 
       # Copy packages to PRIME
-      mkdir -p ${CRAFT_PRIME}${DIST_PACKAGES}
-      cp -r ${DIST_PACKAGES}/* ${CRAFT_PRIME}${DIST_PACKAGES}
-      cp -r . ${CRAFT_PRIME}${APP_HOME}
+      mkdir -p ${CRAFT_PART_INSTALL}${DIST_PACKAGES}
+      cp -r ${DIST_PACKAGES}/* ${CRAFT_PART_INSTALL}${DIST_PACKAGES}
+      cp -r . ${CRAFT_PART_INSTALL}${APP_HOME}
+    stage:
+      - usr/local/lib/python3.10/dist-packages
+      - app
 
   overlay-pkgs:
     plugin: nil
