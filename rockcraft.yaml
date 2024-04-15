@@ -23,6 +23,11 @@ services:
       SUPERSET_SECRET_KEY: "supersetR0cks!"
       ADMIN_PASSWORD: "admin"
       SUPERSET_LOAD_EXAMPLES: True
+  statsd-exporter:
+    override: replace
+    summary: "statsd metrics exporter"
+    startup: disabled
+    command: "/usr/bin/statsd_exporter"
 
 platforms:
   amd64:
@@ -142,6 +147,16 @@ parts:
       mkdir -p ${CRAFT_PRIME}${DIST_PACKAGES}
       cp -r ${DIST_PACKAGES}/* ${CRAFT_PRIME}${DIST_PACKAGES}
       cp -r . ${CRAFT_PRIME}${APP_HOME}
+
+  prometheus-statsd-exporter:
+    plugin: dump
+    source: https://github.com/prometheus/statsd_exporter/releases/download/v0.26.1/statsd_exporter-0.26.1.linux-amd64.tar.gz # yamllint disable-line
+    source-type: tar
+    source-checksum: sha256/36b33a04531cf871cf8c9c5d667e3c0ca59c07b4ba496bd6cd066bec4f25cc0d # yamllint disable-line
+    organize:
+      statsd_exporter: bin/statsd_exporter
+    stage:
+      - bin/statsd_exporter
 
   overlay-pkgs:
     plugin: nil
