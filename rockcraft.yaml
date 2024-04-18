@@ -17,41 +17,28 @@ services:
     override: replace
     summary: "superset-ui service"
     startup: disabled
-    command: "/app/k8s/k8s-bootstrap.sh"
+    command: "sleep infinity"
+    #command: "/app/k8s/k8s-bootstrap.sh"
     environment:
       CHARM_FUNCTION: "app-gunicorn"
       SUPERSET_SECRET_KEY: "supersetR0cks!"
       ADMIN_PASSWORD: "admin"
       SUPERSET_LOAD_EXAMPLES: True
+  statsd-exporter:
+    override: replace
+    summary: "statsd metrics exporter"
+    startup: disabled
+    command: "/usr/bin/statsd_exporter"
 
 platforms:
   amd64:
 
 parts:
-  backend:
-    plugin: python
+  common:
+    plugin: dump
     source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
-    source-checksum: sha512/62d240555ea50156fd16ad6dbc6fb26b86ca5319d0528e60cd4fbcb9fbeb9d529acfb43e272883d578df87e609a541a0116dfa8f4a955a3aeca3538adf58852a
+    source-checksum: sha512/62d240555ea50156fd16ad6dbc6fb26b86ca5319d0528e60cd4fbcb9fbeb9d529acfb43e272883d578df87e609a541a0116dfa8f4a955a3aeca3538adf58852a  # yamllint disable-line
     source-type: tar
-    build-packages:
-      - build-essential
-    stage-packages:
-      - python3.10-venv
-    build-environment:
-      - APP_HOME: "/app"
-      - SOURCE: "https://downloads.apache.org/superset"
-      - VERSION: "2.1.0"
-      - TAR_FILE: "apache-superset-2.1.0-source.tar.gz"
-      - DIST_PACKAGES: "usr/local/lib/python3.10/dist-packages/"
-    stage:
-      - apache_superset.egg-info
-      - build
-      - requirements
-      - scripts
-      - setup.cfg
-      - setup.py
-      - superset
-      - superset-frontend
 
   local-files:
     plugin: dump
@@ -68,12 +55,9 @@ parts:
       - requirements/rock-requirements.txt
 
   frontend:
-    after: [backend]
     plugin: nil
     build-snaps:
       - node/14/stable
-    build-environment:
-      - ASSETS_DIR: "/lib/python3.10/site-packages/superset/static/assets"
     override-build: |
       # Prepare for asset creation
       cd ${CRAFT_STAGE}/superset-frontend
@@ -83,42 +67,44 @@ parts:
 
       # Install frontend dependencies and build assets
       npm ci
-      npm run build -- --output-path=/dist
-
-      # Copy assets to CRAFT_PRIME
-      mkdir -p "${CRAFT_PRIME}${ASSETS_DIR}"
-      cp -r /dist/* "${CRAFT_PRIME}${ASSETS_DIR}"
+      npm run build -- --output-path=${CRAFT_PART_INSTALL}/assets
+    organize:
+      assets: lib/python3.10/site-packages/superset/static/assets
+    stage:
+      - lib/python3.10/site-packages/superset/static/assets
 
   gunicorn-app:
-    after: [backend, frontend, local-files]
-    plugin: python
+    after: [common, local-files]
+    plugin: nil
     build-packages:
       - build-essential
       - pkg-config
       - libmysqlclient-dev
     stage-packages:
       - python3.10-venv
-    build-environment:
-      - APP_HOME: "/app"
-      - DIST_PACKAGES: "/usr/local/lib/python3.10/dist-packages"
+      - python3-pip
     override-build: |
-      # Install superset requirements
+      cd ${CRAFT_STAGE}
+
+      # Install Superset requirements
       pip install --upgrade setuptools pip \
-        "cython<3.0.0" \
+        -r requirements/base.txt --target=/dist-packages \
         --no-build-isolation pyyaml==5.4.1 \
-        -r ${CRAFT_STAGE}/requirements/base.txt --target=/${DIST_PACKAGES} \
-        -r ${CRAFT_STAGE}/requirements/rock-requirements.txt --target=/${DIST_PACKAGES}
+        -r requirements/rock-requirements.txt --target=/dist-packages
 
-      # Install Superset in editable mode
-      pip install -e .
-
-      # Copy packages to PRIME
-      mkdir -p ${CRAFT_PART_INSTALL}${DIST_PACKAGES}
-      cp -r ${DIST_PACKAGES}/* ${CRAFT_PART_INSTALL}${DIST_PACKAGES}
-      cp -r . ${CRAFT_PART_INSTALL}${APP_HOME}
+      mv -p /dist-packages ${CRAFT_PART_INSTALL}/usr/local/lib/python3.10/
     stage:
       - usr/local/lib/python3.10/dist-packages
-      - app
+
+  prometheus-statsd-exporter:
+    plugin: dump
+    source: https://github.com/prometheus/statsd_exporter/releases/download/v0.26.1/statsd_exporter-0.26.1.linux-amd64.tar.gz # yamllint disable-line
+    source-checksum: sha256/36b33a04531cf871cf8c9c5d667e3c0ca59c07b4ba496bd6cd066bec4f25cc0d # yamllint disable-line
+    source-type: tar
+    organize:
+      statsd_exporter: bin/statsd_exporter
+    stage:
+      - bin/statsd_exporter
 
   overlay-pkgs:
     plugin: nil
