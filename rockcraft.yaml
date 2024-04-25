@@ -115,8 +115,10 @@ parts:
       # Install Superset requirements
       pip install --upgrade setuptools pip \
         --no-build-isolation pyyaml==5.4.1 \
-        -r requirements/base.txt --target=/${CRAFT_PART_INSTALL}/dist \
-        -r ${CRAFT_STAGE}/requirements/rock.txt --target=/${CRAFT_PART_INSTALL}/dist
+        -r requirements/base.txt \
+          --target=/${CRAFT_PART_INSTALL}/dist \
+        -r ${CRAFT_STAGE}/requirements/rock.txt \
+          --target=/${CRAFT_PART_INSTALL}/dist
 
       # Copy current directory files to app
       cp -r . ${CRAFT_PART_INSTALL}/app
