@@ -18,6 +18,3 @@ sqlalchemy-redshift==0.8.1
 # Monitoring
 sentry-sdk==0.10.2
 statsd==4.0.1
-
-# Superset
-apache-superset==2.1.0
