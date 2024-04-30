@@ -35,6 +35,7 @@ platforms:
 # Please refer to
 # https://discourse.ubuntu.com/t/unifying-user-identity-across-snaps-and-rocks/36469
 # for more information about shared user.
+# The UID 584792 corresponds to _daemon_ user.
 run_user: _daemon_
 
 parts:
