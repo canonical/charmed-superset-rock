@@ -5,7 +5,7 @@
 name: charmed-superset-rock
 base: ubuntu@22.04
 version: 2.1.0-22.04-edge
-summary: Charmed Superset ROCK OCI
+summary: Charmed Superset rock OCI
 description: |
   Superset is a business intelligence tool that is fast, lightweight,
   intuitive, and loaded with options that make it easy for users
