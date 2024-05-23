@@ -1,4 +1,4 @@
-name: Publish ROCK
+name: Publish rock
 on:
   push:
     branches:

@@ -1,4 +1,4 @@
-name: Build ROCK
+name: Build rock
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,7 +34,7 @@ jobs:
         run: |
           sudo snap install yq
           sudo snap install rockcraft --classic --edge
-      - name: Build ROCK
+      - name: Build rock
         run: |
           app_version=$(yq '.version' rockcraft.yaml)
           version=$(yq '(.version|split("-"))[0]' rockcraft.yaml)
@@ -45,7 +45,7 @@ jobs:
           sed -i "0,/${app_version}/{s//${tag}/}" rockcraft.yaml
           rockcraft pack --verbose
 
-      - name: Upload locally built ROCK artifact
+      - name: Upload locally built rock artifact
         uses: actions/upload-artifact@v3
         with:
           name: charmed-superset-rock

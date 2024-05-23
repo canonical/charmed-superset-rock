@@ -1,11 +1,12 @@
-# Charmed Apache Superset ROCK
+# Charmed Apache Superset rock
 
-This repository contains the packaging metadata for creating a Charmed Superset ROCK. This ROCK image is based on the upstream [Apache Superset](https://downloads.apache.org/superset/) image.
+This repository contains the packaging metadata for creating a Charmed Superset rock. This rock is based on the upstream [Apache Superset](https://downloads.apache.org/superset/) image.
 
-For more information on ROCKs, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
+For more information on rocks, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
 
-## Building the ROCK
-The steps outlined below are based on the assumption that you are building the ROCK with the latest LTS of Ubuntu.  
+## Building the rock
+
+The steps outlined below are based on the assumption that you are building the rock with the latest LTS of Ubuntu.  
 If you are using another version of Ubuntu or another operating system, the process may be different. 
 To avoid any issue with other operating systems you can simply build the image with [multipass](https://multipass.run/):
 ```bash
@@ -35,7 +36,9 @@ newgrp docker
 sudo snap disable docker
 sudo snap enable docker
 ```
-### Packing and Running the ROCK
+
+### Packing and Running the rock
+
 ```bash
 rockcraft pack
 sudo skopeo --insecure-policy copy oci-archive:charmed-superset-rock_2.1.0-22.04-edge_amd64.rock docker-daemon:charmed-superset-rock:2.1.0
@@ -61,7 +64,7 @@ Further information on connecting data sources and creating dashboards can be fo
 `make clean-all` will remove the image and get you ready to start from `make dev`
 
 ## License
-The Charmed Superset ROCK is free software, distributed under the Apache
+The Charmed Superset rock is free software, distributed under the Apache
 Software License, version 2.0. See
 [LICENSE](https://github.com/canonical/charmed-superset-rock/blob/main/LICENSE)
 for more information.
