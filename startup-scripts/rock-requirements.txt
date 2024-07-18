@@ -16,5 +16,5 @@ thrift==0.16.0
 sqlalchemy-redshift==0.8.1
 
 # Monitoring
-sentry-sdk==0.10.2
+sentry-sdk==2.8.0
 statsd==4.0.1
