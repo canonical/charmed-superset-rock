@@ -67,12 +67,18 @@ parts:
       run-server.sh: app/k8s/run-server.sh
       k8s-init.sh: app/k8s/k8s-init.sh
       k8s-bootstrap.sh: app/k8s/k8s-bootstrap.sh
+      rock-requirements.txt: requirements/rock.txt
     stage:
       - app/k8s/run-server.sh
       - app/k8s/k8s-init.sh
       - app/k8s/k8s-bootstrap.sh
+      - requirements/rock.txt 
     permissions:
       - path: app/k8s
+        owner: 584792
+        group: 584792
+        mode: "755"
+      - path: requirements
         owner: 584792
         group: 584792
         mode: "755"
@@ -133,6 +139,8 @@ parts:
       # Install Superset requirements
       pip install --upgrade setuptools pip \
         -r requirements/base.txt \
+          --target=/${CRAFT_PART_INSTALL}/dist \
+        -r ${CRAFT_STAGE}/requirements/rock.txt \
           --target=/${CRAFT_PART_INSTALL}/dist
 
       # Copy current directory files to app
