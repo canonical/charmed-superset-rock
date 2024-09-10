@@ -72,7 +72,7 @@ parts:
       - app/k8s/run-server.sh
       - app/k8s/k8s-init.sh
       - app/k8s/k8s-bootstrap.sh
-      - requirements/rock.txt 
+      - requirements/rock.txt
     permissions:
       - path: app/k8s
         owner: 584792
