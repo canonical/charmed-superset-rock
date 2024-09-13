@@ -126,7 +126,7 @@ parts:
   dependencies:
     after: [local-files]
     plugin: python
-    source: https://downloads.apache.org/superset/3.1.3/apache-superset-3.1.3-source.tar.gz   # yamllint disable-line
+    source: https://downloads.apache.org/superset/3.1.3/apache-superset-3.1.3-source.tar.gz  # yamllint disable-line
     source-checksum: sha512/5c35ae761d25fdbd3e1c1dc17d0354b1dd23d98d9c863da7d61b013d59cdb4337cd9e93f8a5b105b657e5d33fa823e138281e8f475dcd20fa0d473e56a00ea7e  # yamllint disable-line
     source-type: tar
     build-packages:
