@@ -4,7 +4,7 @@
 # https://github.com/apache/superset/blob/master/Dockerfile
 name: charmed-superset-rock
 base: ubuntu@22.04
-version: 2.1.0-22.04-edge
+version: 3.1.3-22.04-edge
 summary: Charmed Superset ROCK OCI
 description: |
   Superset is a business intelligence tool that is fast, lightweight,
@@ -22,7 +22,7 @@ services:
       CHARM_FUNCTION: "app-gunicorn"
       SUPERSET_SECRET_KEY: "supersetR0cks!"
       ADMIN_PASSWORD: "admin"
-      SUPERSET_LOAD_EXAMPLES: True
+      SUPERSET_LOAD_EXAMPLES: "true"
   statsd-exporter:
     override: replace
     summary: "statsd metrics exporter"
@@ -52,8 +52,8 @@ parts:
   superset:
     after: [dependencies]
     plugin: python
-    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
-    source-checksum: sha512/62d240555ea50156fd16ad6dbc6fb26b86ca5319d0528e60cd4fbcb9fbeb9d529acfb43e272883d578df87e609a541a0116dfa8f4a955a3aeca3538adf58852a  # yamllint disable-line
+    source: https://downloads.apache.org/superset/3.1.3/apache-superset-3.1.3-source.tar.gz  # yamllint disable-line
+    source-checksum: sha512/5c35ae761d25fdbd3e1c1dc17d0354b1dd23d98d9c863da7d61b013d59cdb4337cd9e93f8a5b105b657e5d33fa823e138281e8f475dcd20fa0d473e56a00ea7e  # yamllint disable-line
     source-type: tar
     build-packages:
       - build-essential
@@ -86,8 +86,8 @@ parts:
   frontend:
     after: [patches]
     plugin: nil
-    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
-    source-checksum: sha512/62d240555ea50156fd16ad6dbc6fb26b86ca5319d0528e60cd4fbcb9fbeb9d529acfb43e272883d578df87e609a541a0116dfa8f4a955a3aeca3538adf58852a  # yamllint disable-line
+    source: https://downloads.apache.org/superset/3.1.3/apache-superset-3.1.3-source.tar.gz  # yamllint disable-line
+    source-checksum: sha512/5c35ae761d25fdbd3e1c1dc17d0354b1dd23d98d9c863da7d61b013d59cdb4337cd9e93f8a5b105b657e5d33fa823e138281e8f475dcd20fa0d473e56a00ea7e  # yamllint disable-line
     source-type: tar
     build-packages:
       - git
@@ -99,8 +99,16 @@ parts:
       # Prepare for asset creation
       cd superset-frontend
 
-      # Install missing frontend dependency
-      npm install currencyformatter.js --save
+      npm i --save-dev @types/underscore \
+        @types/urijs \
+        @types/mapbox__geojson-extent
+
+      npm install @loaders.gl/core \
+        @loaders.gl/loader-utils \
+        @react-spring/web
+
+      npm install dom-to-image \
+        currencyformatter.js --save
 
       # Install frontend dependencies and build assets
       npm ci
@@ -118,8 +126,8 @@ parts:
   dependencies:
     after: [local-files]
     plugin: python
-    source: https://downloads.apache.org/superset/2.1.0/apache-superset-2.1.0-source.tar.gz  # yamllint disable-line
-    source-checksum: sha512/62d240555ea50156fd16ad6dbc6fb26b86ca5319d0528e60cd4fbcb9fbeb9d529acfb43e272883d578df87e609a541a0116dfa8f4a955a3aeca3538adf58852a  # yamllint disable-line
+    source: https://downloads.apache.org/superset/3.1.3/apache-superset-3.1.3-source.tar.gz  # yamllint disable-line
+    source-checksum: sha512/5c35ae761d25fdbd3e1c1dc17d0354b1dd23d98d9c863da7d61b013d59cdb4337cd9e93f8a5b105b657e5d33fa823e138281e8f475dcd20fa0d473e56a00ea7e  # yamllint disable-line
     source-type: tar
     build-packages:
       - build-essential
@@ -130,7 +138,6 @@ parts:
     override-build: |
       # Install Superset requirements
       pip install --upgrade setuptools pip \
-        --no-build-isolation pyyaml==5.4.1 \
         -r requirements/base.txt \
           --target=/${CRAFT_PART_INSTALL}/dist \
         -r ${CRAFT_STAGE}/requirements/rock.txt \
