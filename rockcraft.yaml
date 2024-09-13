@@ -145,6 +145,11 @@ parts:
 
       # Copy current directory files to app
       cp -r . ${CRAFT_PART_INSTALL}/app
+
+      # Copy webfront images to expected dir
+      cd ${CRAFT_PART_INSTALL}/dist/flask_appbuilder/static/appbuilder/
+      cp -r css/webfonts/ webfonts/
+
     organize:
       dist: usr/local/lib/python3.10/dist-packages
     stage:
