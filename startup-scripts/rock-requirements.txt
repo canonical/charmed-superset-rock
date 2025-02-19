@@ -1,7 +1,7 @@
 # Required dependencies missing from Superset requirements.txt
 Pillow==10.1.0
 jmespath==1.0.1
-playwright==1.30.0
+playwright==1.31.0
 
 # Optional dependencies for Database connectors
 psycopg2-binary==2.9.4
