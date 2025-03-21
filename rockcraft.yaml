@@ -176,6 +176,20 @@ parts:
         group: 584792
         mode: "755"
 
+  prometheus-celery-exporter:
+    plugin: dump
+    source: https://github.com/canonical/celery-exporter/releases/download/celery-exporter-chart-0.8.0/celery-exporter # yamllint disable-line
+    source-type: file
+    organize:
+      celery-exporter: bin/celery-exporter
+    stage:
+      - bin/celery-exporter
+    permissions:
+      - path: bin/celery-exporter
+        owner: 584792
+        group: 584792
+        mode: "755"
+
   overlay-pkgs:
     after: [superset]
     plugin: nil
