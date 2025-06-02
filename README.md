@@ -1,5 +1,8 @@
 # Charmed Apache Superset ROCK
 
+> ⚠️ **This project has moved!**  
+> Now it is part of the `superset-k8s-operator` repository that can be found [here](https://github.com/canonical/superset-k8s-operator).
+
 This repository contains the packaging metadata for creating a Charmed Superset ROCK. This ROCK image is based on the upstream [Apache Superset](https://downloads.apache.org/superset/) image.
 
 For more information on ROCKs, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
